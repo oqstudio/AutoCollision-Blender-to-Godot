@@ -1,10 +1,10 @@
 bl_info = {
-    "name": "AutoCollision & Navmesh Ultimate (Hybrid Perfect)",
+    "name": "AutoCollision & Navmesh Ultimate",
     "blender": (4, 1, 0),
     "category": "Object",
-    "author": "OshQRD Studio",
+    "author": "OQ Studio",
     "version": (4, 0),
-    "description": "Combines v3.30 Navmesh stability with v3.90 Collision improvements. No .001 duplicates, no coordinate shifts.",
+    "description": "AutoCollision & Navmesh Ultimate",
     "location": "View3D > Collisions",
     "warning": "",
     "support": "COMMUNITY",
@@ -595,4 +595,5 @@ def unregister():
     bpy.utils.unregister_class(CollisionGeneratorProperties)
 
 if __name__ == "__main__":
+
     register()
