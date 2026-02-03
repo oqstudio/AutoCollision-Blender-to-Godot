@@ -4,23 +4,49 @@ bl_info = {
     "category": "Object",
     "author": "OQ Studio",
     "version": (4, 0),
-    "description": "AutoCollision & Navmesh Ultimate",
-    "location": "View3D > Collisions",
+    "description": "Professional toolset for Godot 4.x. One-click collisions and stable Navmesh generation.",
+    "location": "View3D > Sidebar > Collisions",
     "warning": "",
+    "doc_url": "https://github.com/oqstudio/AutoCollision-Blender-to-Godot",
+    "tracker_url": "https://github.com/oqstudio/AutoCollision-Blender-to-Godot/issues",
     "support": "COMMUNITY",
-    "license": "Personal, Non-Commercial, No-Derivatives",
+    "license": "GNU General Public License v3.0",
 }
 
 import bpy
 import bmesh
 import math
+import os
 from bpy.props import BoolProperty, EnumProperty, PointerProperty, FloatProperty, StringProperty
-from bpy.types import Operator, PropertyGroup, Panel
+from bpy.types import Operator, PropertyGroup, Panel, AddonPreferences
 from mathutils import Vector
+
+# --- ADDON PREFERENCES (Widoczne w oknie Preferences podczas instalacji) ---
+class OQ_STUDIO_AddonPreferences(AddonPreferences):
+    bl_idname = __name__
+
+    def draw(self, context):
+        layout = self.layout
+        column = layout.column(align=True)
+        
+        column.label(text="AutoCollision & Navmesh Ultimate", icon='SOLO_ON')
+        column.label(text="Developed by OQ Studio (oqstudio.pl)")
+        column.separator()
+        
+        box = column.box()
+        box.label(text="Godot 4.x Optimization Workflow:", icon='INFO')
+        box.label(text="• Automatic collision cleanup (prevents .001 duplicates).")
+        box.label(text="• Stable Navmesh generation via World Space Reset.")
+        
+        row = box.row(align=True)
+        row.operator("wm.url_open", text="GitHub Repository", icon='HOME').url = "https://github.com/oqstudio/AutoCollision-Blender-to-Godot"
+        row.operator("wm.url_open", text="Report a Bug", icon='URL').url = "https://github.com/oqstudio/AutoCollision-Blender-to-Godot/issues"
+        
+        column.separator()
+        column.label(text="License: GNU General Public License v3.0", icon='GHOST_ENABLED')
 
 # --- HELPER: BEZPIECZNE SPRAWDZANIE ---
 def is_valid(obj):
-    """Sprawdza czy obiekt istnieje (zapobiega ReferenceError)."""
     try:
         return obj is not None and obj.name in bpy.data.objects
     except (ReferenceError, AttributeError):
@@ -160,7 +186,7 @@ def duplicate_and_merge(context, objects, method='JOIN'):
             bpy.data.objects.remove(temp, do_unlink=True)
         return base
 
-# --- CLEANING HELPERS (Z V3.90 - Najlepsze) ---
+# --- CLEANING HELPERS ---
 def is_collision_name(name):
     suffixes = ['-col', '-colonly', '-navmesh']
     for s in suffixes:
@@ -169,7 +195,6 @@ def is_collision_name(name):
     return False
 
 def remove_existing_collision(obj):
-    """Usuwa WSZYSTKIE kolizje (-col i -colonly)."""
     if not is_valid(obj): return
     objects_to_delete = set()
     for child in obj.children:
@@ -188,7 +213,6 @@ def remove_existing_collision(obj):
             except: pass
 
 def remove_existing_navmesh(obj):
-    """Usuwa WSZYSTKIE navmeshy."""
     if not is_valid(obj): return
     objects_to_delete = set()
     for child in obj.children:
@@ -227,7 +251,7 @@ class CollisionGeneratorProperties(PropertyGroup):
     nav_offset: FloatProperty(name="Lift (m)", default=0.05, unit='LENGTH')
     nav_decimation: FloatProperty(name="Simplify", default=0.8, min=0.01, max=1.0, subtype='FACTOR')
 
-# --- OPERATOR: KOLIZJE (Z V3.90 - Ten dobry, co nie robi .001) ---
+# --- OPERATORS ---
 class OBJECT_OT_generate_collision(Operator):
     bl_idname = "object.generate_collision"
     bl_label = "Generate Collision"
@@ -307,9 +331,7 @@ class OBJECT_OT_generate_collision(Operator):
             center = (min_c + max_c) / 2
             size = max_c - min_c
             
-            # Najpierw usuń tymczasowy, potem stwórz nowy (FIX .001)
             bpy.data.objects.remove(working_obj, do_unlink=True)
-            
             bpy.ops.object.select_all(action='DESELECT') 
             bpy.ops.mesh.primitive_cube_add(location=center) 
             working_obj = context.active_object
@@ -337,8 +359,6 @@ class OBJECT_OT_generate_collision(Operator):
         working_obj.hide_render = True
         assign_transparent_material(working_obj, "AutoCollision_MAT", (0.0, 0.3, 1.0, 0.3))
 
-
-# --- OPERATOR: NAVMESH (Z V3.30 - Ten stabilny z "Total Detach") ---
 class OBJECT_OT_generate_navmesh(Operator):
     bl_idname = "object.generate_navmesh"
     bl_label = "Generate Navmesh"
@@ -353,23 +373,19 @@ class OBJECT_OT_generate_navmesh(Operator):
         
         if context.view_layer: context.view_layer.update()
 
-        # 1. Zidentyfikuj zaznaczone
         selected_objects = [obj for obj in (context.selected_objects if not self.all_objects else context.scene.objects) 
                    if is_valid(obj) and obj.type == 'MESH' and not any(obj.name.endswith(s) for s in ['-col', '-colonly', '-navmesh'])]
 
         if not selected_objects: return {'CANCELLED'}
         
-        # 2. Zidentyfikuj starych rodziców
         affected_parents_map = {}
         for obj in selected_objects:
             if obj.parent and is_generated_navmesh(obj.parent):
                 p = obj.parent
                 if p not in affected_parents_map:
-                    # Zbierz WSZYSTKIE dzieci tego rodzica (nawet te niezaznaczone)
                     all_siblings = [child for child in p.children if child.type == 'MESH' and not is_generated_navmesh(child)]
                     affected_parents_map[p] = all_siblings
 
-        # 3. KROK NUKLEARNY: ODKOTWICZ WSZYSTKICH (Selected + Siblings)
         objects_to_unparent = set(selected_objects)
         for siblings in affected_parents_map.values():
             objects_to_unparent.update(siblings)
@@ -379,18 +395,14 @@ class OBJECT_OT_generate_navmesh(Operator):
                 wm = obj.matrix_world.copy()
                 obj.parent = None
                 obj.matrix_world = wm
-                # Używamy nowszego helpera do czyszczenia
                 remove_existing_navmesh(obj)
 
         context.view_layer.update()
 
-        # 4. USUŃ STARYCH RODZICÓW
         for old_navmesh in affected_parents_map.keys():
             try: bpy.data.objects.remove(old_navmesh, do_unlink=True)
             except: pass
 
-        # 5. GENERUJ NAVMESH DLA ZAZNACZONYCH (NOWA GRUPA)
-        created_count = 0
         groups = group_objects_by_bbox_distance(selected_objects, dist_limit) if merge else [[obj] for obj in selected_objects]
 
         for group in groups:
@@ -400,16 +412,12 @@ class OBJECT_OT_generate_navmesh(Operator):
             if context.view_layer.objects.active in group: leader = context.view_layer.objects.active
             
             self.create_navmesh_for_group(context, group, leader.name + suffix, props)
-            created_count += 1
 
-        # 6. ODBUDUJ NAVMESHY DLA POZOSTAŁYCH (STARE GRUPY)
         for old_navmesh_obj, original_siblings in affected_parents_map.items():
             leftovers = [s for s in original_siblings if s not in selected_objects and is_valid(s)]
-            
             if leftovers:
                 leader_leftover = leftovers[0]
                 self.create_navmesh_for_group(context, leftovers, leader_leftover.name + suffix, props)
-                created_count += 1
 
         bpy.ops.object.select_all(action='DESELECT')
         for obj in selected_objects: 
@@ -486,7 +494,6 @@ class OBJECT_OT_generate_navmesh(Operator):
         working_obj.hide_render = True
         assign_transparent_material(working_obj, "AutoNavmesh_MAT", (1.0, 0.0, 0.0, 0.4))
 
-# --- OPERATOR: USUWANIE (Z V3.30 - Ten prosty) ---
 class OBJECT_OT_delete_specific(Operator):
     bl_idname = "object.delete_specific"
     bl_label = "Delete Specific"
@@ -500,14 +507,11 @@ class OBJECT_OT_delete_specific(Operator):
         elif self.target_type == 'NAV': suffixes = ['-navmesh']
         
         if context.view_layer: context.view_layer.update()
-        
         check = list(context.scene.objects) if self.scope == 'ALL' else list(context.selected_objects)
         deleted = 0
         
         for obj in check:
-            # Dodane zabezpieczenie is_valid, ale logika iteracji z v3.30 (prosta)
             if not is_valid(obj): continue
-
             try:
                 if any(obj.name.endswith(s) for s in suffixes):
                     children = [child for child in obj.children if is_valid(child)]
@@ -515,7 +519,6 @@ class OBJECT_OT_delete_specific(Operator):
                         mat_world = child.matrix_world.copy()
                         child.parent = None
                         child.matrix_world = mat_world
-                    
                     bpy.data.objects.remove(obj, do_unlink=True)
                     deleted += 1
                     continue
@@ -578,22 +581,25 @@ class VIEW3D_PT_collision_generator(Panel):
         op = row_del.operator("object.delete_specific", text="Del All", icon='TRASH')
         op.target_type, op.scope = 'NAV', 'ALL'
 
+# --- REJESTRACJA ---
+CLASSES = [
+    OQ_STUDIO_AddonPreferences,
+    CollisionGeneratorProperties,
+    OBJECT_OT_generate_collision,
+    OBJECT_OT_generate_navmesh,
+    OBJECT_OT_delete_specific,
+    VIEW3D_PT_collision_generator,
+]
+
 def register():
-    bpy.utils.register_class(CollisionGeneratorProperties)
-    bpy.utils.register_class(OBJECT_OT_generate_collision)
-    bpy.utils.register_class(OBJECT_OT_generate_navmesh)
-    bpy.utils.register_class(OBJECT_OT_delete_specific)
-    bpy.utils.register_class(VIEW3D_PT_collision_generator)
+    for cls in CLASSES:
+        bpy.utils.register_class(cls)
     bpy.types.Scene.collision_generator_props = PointerProperty(type=CollisionGeneratorProperties)
 
 def unregister():
+    for cls in reversed(CLASSES):
+        bpy.utils.unregister_class(cls)
     del bpy.types.Scene.collision_generator_props
-    bpy.utils.unregister_class(VIEW3D_PT_collision_generator)
-    bpy.utils.unregister_class(OBJECT_OT_delete_specific)
-    bpy.utils.unregister_class(OBJECT_OT_generate_navmesh)
-    bpy.utils.unregister_class(OBJECT_OT_generate_collision)
-    bpy.utils.unregister_class(CollisionGeneratorProperties)
 
 if __name__ == "__main__":
-
     register()
