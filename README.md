@@ -63,7 +63,7 @@ Found a bug or have a feature request? Please let us know!
 
 <div align="center">
   <a href="https://oqstudio.github.io">
-    <img src="https://oqstudio.github.io/assets/logo.png" alt="OQ Studio Logo" width="50"/>
+    <img src="assets/logo.png" alt="OQ Studio Logo" width="50"/>
   </a>
   <br>
   <sub>Developed with passion by <b>OQ Studio</b> for the Godot Community.</sub>
