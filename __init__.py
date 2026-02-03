@@ -45,8 +45,8 @@ class OQ_STUDIO_AddonPreferences(AddonPreferences):
         
         box = column.box()
         box.label(text="Godot 4.x Optimization Workflow:", icon='INFO')
-        box.label(text="• Automatic collision cleanup (prevents .001 duplicates).")
-        box.label(text="• Stable Navmesh generation via World Space Reset.")
+        box.label(text="• Automatic Collisions")
+        box.label(text="• Intelligent Navmesh Generation")
         
         row = box.row(align=True)
         row.operator("wm.url_open", text="GitHub Repository", icon='HOME').url = "https://github.com/oqstudio/AutoCollision-Blender-to-Godot"
@@ -276,3 +276,4 @@ def unregister():
 
 if __name__ == "__main__":
     register()
+
