@@ -1,7 +1,7 @@
 # AutoCollision & Navmesh Ultimate for Godot 4.x
 
 <div align="center">
-  <img src="assets/logo.png" alt="AutoCollision Logo" width="600"/>
+  <img src="assets/logo.png" alt="AutoCollision Logo" width="300"/>
 </div>
 
 **AutoCollision & Navmesh Ultimate** is a powerful Blender addon designed specifically for **Godot 4.x** developers. It automates the tedious process of setting up physics bodies and navigation meshes, ensuring a seamless bridge between Blender and Godot without the common headache of broken hierarchies or naming conflicts.
@@ -62,7 +62,7 @@ Found a bug or have a feature request? Please let us know!
 ---
 
 <div align="center">
-  <a href="https://oqstudio.pl">
+  <a href="https://oqstudio.github.io">
     <img src="https://oqstudio.pl/wp-content/uploads/2023/05/logo-oqstudio-dark.png" alt="OQ Studio Logo" width="200"/>
   </a>
   <br>
