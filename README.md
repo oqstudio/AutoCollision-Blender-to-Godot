@@ -31,7 +31,7 @@ Learn how to use AutoCollision & Navmesh Ultimate in your project:
 
 <div align="center">
   <a href="https://www.youtube.com/watch?v=pyVeI56nHfo">
-    <img src="https://img.youtube.com/vi/pyVeI56nHfo/maxresdefault.jpg" alt="Watch the tutorial" style="width:100%; max-width:600px;">
+    <img src="https://img.youtube.com/vi/pyVeI56nHfo/maxresdefault.jpg" alt="Watch the tutorial" style="width:70%; max-width:600px;">
   </a>
 </div>
 
@@ -57,7 +57,7 @@ Found a bug or have a feature request? Please let us know!
 ## 🔗 Links
 
 * **GitHub Repository:** [https://github.com/oqstudio/AutoCollision-Blender-to-Godot](https://github.com/oqstudio/AutoCollision-Blender-to-Godot)
-* **Official Website:** [https://oqstudio.pl](https://oqstudio.pl)
+* **Official Website:** [https://oqstudio.github.io]([https://oqstudio.github.io)
 
 ---
 
