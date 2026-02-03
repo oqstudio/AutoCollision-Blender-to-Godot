@@ -57,7 +57,7 @@ Found a bug or have a feature request? Please let us know!
 ## 🔗 Links
 
 * **GitHub Repository:** [https://github.com/oqstudio/AutoCollision-Blender-to-Godot](https://github.com/oqstudio/AutoCollision-Blender-to-Godot)
-* **Official Website:** [https://oqstudio.github.io]([https://oqstudio.github.io)
+* **Official Website:** [https://oqstudio.github.io](https://oqstudio.github.io)
 
 ---
 
