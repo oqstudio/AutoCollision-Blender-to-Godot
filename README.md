@@ -25,13 +25,15 @@ Stop fighting with "jumping objects" when grouping meshes for navigation.
 * **Auto-Heal:** If you remove an object from a Navmesh group, the addon automatically recalculates the remaining Navmesh to fit the current setup.
 * **Geometry Control:** Adjust *Max Slope*, *Lift (Offset)*, and *Simplify (Decimation)* directly from the UI panel.
 
----
+## 📺 Video Tutorial & Demo
 
-## 📺 Video Demo
+Learn how to use AutoCollision & Navmesh Ultimate in your project:
 
-Watch the addon in action and see the workflow improvements:
-
-[![AutoCollision Demo](https://img.youtube.com/vi/pyVeI56QHfo/0.jpg)](https://youtu.be/pyVeI56QHfo)
+<div align="center">
+  <a href="https://www.youtube.com/watch?v=pyVeI56nHfo">
+    <img src="https://img.youtube.com/vi/pyVeI56nHfo/maxresdefault.jpg" alt="Watch the tutorial" style="width:100%; max-width:600px;">
+  </a>
+</div>
 
 ---
 
