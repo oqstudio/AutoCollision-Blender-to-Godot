@@ -6,10 +6,8 @@ bl_info = {
     "version": (4, 0),
     "description": "Professional toolset for Godot 4.x. One-click collisions and stable Navmesh generation.",
     "location": "View3D > Sidebar > Collisions",
-    "warning": "",
     "doc_url": "https://github.com/oqstudio/AutoCollision-Blender-to-Godot",
     "tracker_url": "https://github.com/oqstudio/AutoCollision-Blender-to-Godot/issues",
-    "support": "COMMUNITY",
     "license": "GNU General Public License v3.0",
 }
 
@@ -27,10 +25,16 @@ class OQ_STUDIO_AddonPreferences(AddonPreferences):
 
     def draw(self, context):
         layout = self.layout
+        pcoll = preview_collections.get("main")
+        if pcoll and "my_logo" in pcoll:
+            row = layout.row()
+            row.alignment = 'CENTER'
+            row.template_icon(icon_value=pcoll["my_logo"].icon_id, scale=5.0) 
+        
         column = layout.column(align=True)
         
         column.label(text="AutoCollision & Navmesh Ultimate", icon='SOLO_ON')
-        column.label(text="Developed by OQ Studio (oqstudio.pl)")
+        column.label(text="Developed by OQ Studio (oqstudio.github.io)")
         column.separator()
         
         box = column.box()
@@ -41,6 +45,7 @@ class OQ_STUDIO_AddonPreferences(AddonPreferences):
         row = box.row(align=True)
         row.operator("wm.url_open", text="GitHub Repository", icon='HOME').url = "https://github.com/oqstudio/AutoCollision-Blender-to-Godot"
         row.operator("wm.url_open", text="Report a Bug", icon='URL').url = "https://github.com/oqstudio/AutoCollision-Blender-to-Godot/issues"
+        row.operator("wm.url_open", text="OQ Studio site", icon='URL').url = "https://oqstudio.github.io"
         
         column.separator()
         column.label(text="License: GNU General Public License v3.0", icon='GHOST_ENABLED')
@@ -603,3 +608,4 @@ def unregister():
 
 if __name__ == "__main__":
     register()
+
